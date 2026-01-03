@@ -1,0 +1,49 @@
+\documentclass[11pt, oneside, twoside, a4paper, notitlepage]{article}
+
+\usepackage[spanish]{babel}
+\usepackage[a4paper, margin=2.0cm]{geometry}
+\usepackage[utf8]{inputenc}
+
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+
+\newcommand{\abs}[1]{\left|#1\right|}
+\newcommand{\norm}[1]{\lVert #1\rVert}
+\newcommand{\CM}{\mathcal{M}}
+\newcommand{\kets}[1]{\left\{#1\right\}}
+\renewcommand{\epsilon}{\varepsilon}
+\newcommand{\NN}{{\rm I\! N}}
+\newcommand{\RR}{{\rm I\! R}}
+
+
+\begin{document}
+	\section*{\huge Cuestión 1}
+	\noindent Consideramos el problema
+	$$\begin{cases}
+		u_t = u_{xx} & 0 \leq x \leq 1 \\
+		u(x, 0) = \sen(2\pi x) & 0 \leq x \leq 1\\
+		u(0,t) = u(1,t) = 0 & 0 \leq t \leq T = 0.5 
+	\end{cases}$$
+	cuya solución viene dada por 
+	$$u(x,t) = e^{-4\pi^2 t}\sen(2\pi x)$$
+	Nuestro objetivo es estimar los valores de la solución en una partición de la región $R = [0, 1] \times [0, 0 . 5]$ usando el método de euler explícito, el método de euler implícito y el método de Crank-Nikolson. De ahora en adelante, consideramos $J, N \in  \NN$, $h = 1 / J$ y $K = T / N$. Definimos también 
+	\begin{align*}
+		x_j := j h & \quad j = 0,1,\dots, J \\
+		t_n := nK & \quad n = 0,1,\dots, N 
+	\end{align*} 
+	y vamos a estimar los valores $U_j^n := u(x_j, t_n)$.
+	
+	\subsection*{Método de Euler explícito}
+	\noindent
+	El método de Euler explícito viene dado por 
+	$$U_j^{n+1} = U_j^n + \frac{K}{h^2} \kets{U_{j+1}^n -2 U_j^n + U_{j-1}^n}$$
+	Si definimos $\mu := \frac{K}{h^2}$ entonces el método es estable si $\mu \leq \frac{1}{2}$. Está condición nos hace considerar la siguiente gama de valores para ejecutar el método.
+
+	\subsection*{Método de Euler implícito}
+	\noindent
+	El método de Euler implícito viene dado por 
+	$$U_j^{n+1} = U_j^n + \frac{K}{h^2}\kets{U_{j+1}^{n+1}-2 U_j^{n+1} + U_{j-1}^{n+1}}$$
+	Para este método no hay restricción de estabilidad luego podemos proceder con las malla 
+\end{document}
