@@ -1,0 +1,31 @@
+function val = el_cuad(a, m, b, x)
+    val = 0;
+
+    if a <= x && x <= m
+        val = phi_3(a, m, x) + phi_2(a, m, x);
+    else 
+        val = phi_1(m, b, x) + phi_2(m, b, x);
+    end
+    
+end
+
+function val = phi_1(a, b, x)
+    h = b - a;
+    m = (a + b) / 2;
+
+    val = 2 * (b - x) * (m - x) / (h^2);
+end
+
+function val = phi_2(a, b, x)
+    h = b - a;
+    m = (a + b) / 2;
+
+    val = 4 * (b - x) * (x - a) / (h^2);
+end
+
+function val = phi_3(a, b, x)
+    h = b - a;
+    m = (a + b) / 2;
+
+    val = 2 * (x - a) * (x - m) / (h^2);
+end

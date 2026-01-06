@@ -1,0 +1,288 @@
+
+\documentclass[11pt, oneside, twoside, a4paper, notitlepage]{article}
+
+\usepackage[spanish, es-lcroman]{babel}
+
+\usepackage[a4paper, margin=2.0cm]{geometry}
+\usepackage[utf8]{inputenc}
+
+\usepackage{enumitem}
+
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+
+\usepackage{graphicx}
+
+\usepackage{tikz}
+\usetikzlibrary{math,calc}
+\usepackage{bm}
+
+\newcommand{\abs}[1]{\left|#1\right|}
+\newcommand{\norm}[1]{\lVert #1\rVert}
+\newcommand{\CM}{\mathcal{M}}
+\newcommand{\kets}[1]{\left\{#1\right\}}
+\renewcommand{\epsilon}{\varepsilon}
+\newcommand{\NN}{{\rm I\! N}}
+\newcommand{\RR}{{\rm I\! R}}
+
+
+\begin{document}
+	\section{Formulación del problema para elementos finitos lineales}
+	Vamos a formular la aproximación mediante elementos finitos lineales del problema
+	$$\begin{cases}
+		-u'' + u = f(x) \\
+		u(0) = u(1) = 0
+	\end{cases}$$ con $f(x) = (1 + \pi^2) \sen(\pi x)$.  \\
+
+	Consideramos el espacio de Sobolev $$H_0^1 (0,1) = \kets{v \in L^2 (0,1) : v' \in L^2 (0,1), v(0) = v(1) = 0}.$$ Para cada $v\in H_0^1(0,1)$, multiplicando la ecuación e integrando en $[0,1]$ obtenemos
+	$$-\int_{0}^{1}u''(x) v(x) dx + \int_0^1 u(x) v(x) dx = \int_0^1 f(x) v(x)dx$$
+	Aplicando integración por partes en la primera integral de la ecuación anterior, entiendo $v'$ como la derivada débil,
+	$$\int_0^1 u''(x)v(x)dx = u'(x) v(x) \biggr\lvert_0^1 - \int_0^1 u'(x)v'(x)dx \stackrel{\stackrel{v \in H_0^1}{ }}{ = } - \int_0^1 u'(x)v'(x)dx$$
+	por tanto obtenemos 
+	$$\int_0^1 u(x) v(x) dx + \int_0^1 u'(x)v'(x)dx = \int_0^1 f(x) v(x)dx$$
+	y el problema débil se basa en encontrar $u$ que verifique la ecuación anterior para toda $v\in H_0^1(0,1)$. \\
+	
+	Consideramos $V_h \subset H_0^1(0,1)$ subespacio lineal de dimensión finita. La aproximación Galerkin se basa en resolver la ecuación anterior para elementos de este subespacio. Concretamente, si $$V_h = \langle\varphi_1, \dots, \varphi_n\rangle$$ Dado $u_h \in V_h$, se puede escribir
+	$$u_h(x) = \sum_{j=1}^{n}c_j \varphi_j (x)$$
+	
+	Para cada $i=1,\dots, n$ resolvemos
+	$$\sum_{j=1}^{n}c_j \int_0^1 \varphi_j(x) \varphi_i(x)dx + \sum_{j=1}^{n}c_j \int_0^1 \varphi_j'(x)\varphi_i'(x)dx = \int_0^1 f(x)\varphi_i(x)$$
+	dado que si $u_h$ verifica la ecuación anterior para cada elemento de la base entonces, por linealidad, la verifica para cualquier elemento de $V_h$.\\
+	
+	Si definimos los vectores $\bm{C} := [c_1, \dots, c_n]^t$ y $\bm{b}:=\left[\int_0^1 f(x)\varphi_1(x)dx, \dots, \int_0^1 f(x)\varphi_n(x)dx\right]^t$; y las matrices
+	$$M:=\left[\int_0^1 \varphi_i(x)\varphi_j(x)\right]_{1\leq i,j\leq n}\quad K:= \left[\int_0^1 \varphi_i'(x)\varphi_j'(x)\right]_{1\leq i,j\leq n}$$
+	llamadas matriz de masa y matriz de rigidez respectivamente, el problema se reduce a resolver el sistema
+	$$(M + K) \bm{C} = \bm{b}$$ \\
+	
+	Sea $0 = x_0 <  x_1 < \dots < x_{J + 1} = 1$ una partición de $[0,1]$ uniforme i.e. $x_j - x_{j-1} = h$ para cada $j=1,\dots, J + 1$. Consideramos las funciones definidas en $[0,1]$ por
+	$$\varphi_j(x) := \begin{cases}
+		\frac{x - x_{j-1}}{h} & \text{ si } x \in [x_{j-1}, x_j] \\
+		\frac{x_{j+1} - x}{h} & \text{ si } x \in (x_j, x_{j+1}]
+	\end{cases}\quad j = 1, \dots, J$$
+	donde entendemos que $\varphi_j(x) = 0$ si $x\in [x_{j-1}, x_{j+1}]$. Pongamos $V_h := \langle\varphi_1, \dots, \varphi_n\rangle$ que es efectivamente un subespacio de $H_0^1(0,1)$ pues se verifican las condiciones frontera, $\varphi_j$ es continua para cada $j$ luego está en $L^2 (0,1)$ y $\varphi_j'$ (en el sentido débil) es continua casi siempre luego también está en $L^2(0,1)$.\\
+	
+	Para este espacio en particular calculemos como son $M$ y $K$: para cada $i$ y $j$, si $i\neq j-1,j,j+1$ es claro que $\int_0^1 \varphi_i(x) \varphi_j(x)dx = 0$ pues tienen soporte disjunto. Tenemos que distinguir los casos $i=j - 1, i = j, i = j + 1$
+	
+	\begin{align*}
+		\int_0^1 \varphi_{j-1}(x)\varphi_j(x)dx &= \int_{x_{j-1}}^{x_j} \frac{(x_j - x)}{h}\frac{(x - x_{j-1})}{h}dx \stackrel{\stackrel{u = x - x_{j-1}}{ }}{ = } \frac{1}{h^2}\int_{0}^{h} u(h - u)du = \frac{h^3}{6h^2} = \frac{h}{6}\\ & \\
+		\int_0^1 \varphi_j^2(x)dx &= \int_{x_{j-1}}^{x_j} \left(\frac{x - x_{j-1}}{h}\right)^2dx + \int_{x_j}^{x_{j+1}} \left(\frac{x_{j+1} - x}{h}\right)^2 dx = \begin{bmatrix}
+			u = x - x_{j-1} \\ u = x_{j+1} - x
+		\end{bmatrix} \\ &= \frac{1}{h^2} \kets{\int_0^h u^2du - \int_h^0 u^2du} = \frac{2u^3}{3h^2}\biggr\vert_0^h = \frac{2}{3}h \\ & \\
+		\int_0^1 \varphi_{j}(x)\varphi_{j+1}(x)dx &= \int_{x_j}^{x_{j+1}}\frac{(x_{j+1} - x)}{h} \frac{(x - x_j)}{h}dx = \stackrel{\stackrel{u = x - x_{j}}{ }}{ = } \frac{1}{h^2}\int_0^h u(h - u)du = \frac{h}{6}
+	\end{align*}
+	por tanto
+	$$ M = h
+\begin{bmatrix}
+	\frac{2}{3} & \frac{1}{6} & 0 & \cdots & 0 \\
+	\frac{1}{6} & \frac{2}{3} & \frac{1}{6} & \ddots & \vdots \\
+	0 & \ddots & \ddots & \ddots & 0 \\
+	\vdots & \ddots & \frac{1}{6} & \frac{2}{3} & \frac{1}{6} \\
+	0 & \cdots & 0 & \frac{1}{6} & \frac{2}{3}
+\end{bmatrix}
+$$
+
+Para $K$, sabemos por teoría que la derivada débil de $\varphi_j$ es 
+$$\varphi_j'(x) = \begin{cases}
+	\frac{1}{h} & \text{ si } x \in [x_{j-1}, x_j] \\
+	-\frac{1}{h} & \text{ si } x \in (x_j, x_{j+1}]
+\end{cases}$$
+luego trivialmente
+$$\int_0^1 \varphi_{j-1}'(x)\varphi_j'(x)dx = \int_0^1 \varphi_{j}'(x)\varphi_{j+1}'(x)dx =  -\frac{1}{h} \quad \int_0^1 \varphi_j'(x)^2dx = \frac{2}{h} $$
+y se tiene
+\[
+K = \frac{1}{h}
+\begin{bmatrix}
+	2 & -1 & 0 & \cdots & 0 \\
+	-1 &  2 & -1 & \ddots & \vdots \\
+	0 & \ddots & \ddots & \ddots & 0 \\
+	\vdots & \ddots & -1 & 2 & -1 \\
+	0 & \cdots & 0 & -1 & 2
+\end{bmatrix}.
+\]
+
+Para el cálculo del vector de carga $\bm{b}$ vamos a usar la regla delos trapecios, la regla de Simpson y sustituir por el interpolante lineal de $f$, concretamente, para cada $j$, $\int_0^1 f(x) \varphi_j(x) dx = \int_{x_{j-1}}^{x_{j+1}} f(x)\varphi_j(x)dx$ luego
+\begin{enumerate}[label=(\roman*)]
+	\item \textit{Regla de los trapecios}:
+	$$\int_{x_{j-1}}^{x_{j+1}} f(x)\varphi_j(x)dx \approx \frac{h}{2}\left(f(x_{j-1})\varphi_j(x_{j-1}) + 2f(x_j)\varphi_j(x_j)  +f(x_{j+1})\varphi_j(x_{j+1})\right) = hf(x_j)$$
+	por tanto el vector de carga lo aproximamos por 
+	$$\bm{b} \approx  h\begin{bmatrix}
+		f(x_1) \\ \vdots \\ f(x_{J}) 
+	\end{bmatrix}$$
+	\item \textit{Sustitución por el interpolante lineal}:
+	
+	El interpolante lineal de $f$ viene dado por 
+	$$I_h f (x) = \sum_{j=1}^{J} f(x_j) \varphi_j(x)$$
+	luego
+	\begin{align*}
+		\int_{x_{j-1}}^{x_{j+1}} f(x)\varphi_j(x)dx &\approx \int_{x_{j-1}}^{x_{j+1}} I_h f(x)\varphi_j(x)dx = \int_{x_{j-1}}^{x_{j+1}}\sum_{i=1}^{J} f(x_j) \varphi_i(x) \varphi_j(x)dx\\ &= f(x_{j-1}) \int_{x_{j-1}}^{x_j} \varphi_{j-1}\varphi_jdx + f(x_j) \int_{x_{j-1}}^{x_{j+1}}\varphi_j^2dx + f(x_{j+1}) \int_{x_{j}}^{x_{j+1}} \varphi_{j}\varphi_{j+1}dx
+	\end{align*}
+	y así 
+	$$\bm{b} \approx M \begin{bmatrix}
+		f(x_1) \\ \vdots \\ f(x_{J}) 
+	\end{bmatrix}$$
+\end{enumerate}
+\newpage
+\section{Orden de convergencia para elementos finitos lineales}
+Sabemos por teoría que el orden de convergencia del método es $h^2$. Para el análisis de la convergencia se ha usado los dos métodos descritos anteriormente y hemos calculado para valores desde $J=10$ hasta $J=510$. Para ambos métodos, se calcula el error en norma $L^2$ aproximando la integral de la norma mediante la regla de Simpson en una partición más fina a la usada en cada paso de manera que no evaluamos el error en nodos de interpolación. Para el primer método obtenemos la siguiente gráfica:
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.7\linewidth]{graficas/error_lineal_trapecios}
+	\caption[]{Error para elementos lineales con regla de los trapecios}
+	\label{fig:errorlinealtrapecios}
+\end{figure}
+
+Usando la función de Matlab \texttt{polyfit} obtenemos que la pendiente de la gráfica es $-2$ luego nuestra aproximación tiene orden 2 como se esperaba. Para la aproximación mediante el interpolante lineal obtenemos
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.7\linewidth]{graficas/error_lineal_interpolante}
+	\caption{Error para elementos lineales con interpolante lineal}
+	\label{fig:errorlinealinterpolante}
+\end{figure}
+y se observa claramente que la pendiente es $-2$ y por tanto el orden de convergencia es $2$.
+
+\newpage
+\newcommand{\um}{\frac{1}{2}}
+\section{Formulación del problema para elementos finitos cuadráticos}
+La formulación débil es igual a la anterior, solo tenemos que calcular los elementos cuadráticos. Para la partición $0 = x_0 <  x_1 < \dots < x_{J} = 1$, si definimos el punto medio $x_{j - \um} := \frac{x_{j -1 } + x_j }{2}$, consideramos las funciones 
+
+\begin{align*}
+	\varphi_1^j \left(x\right)&:=\frac{\left(x_j - x\right)\left(x_{j - \um} - x\right)}{\left(x_j - x_{j-1}\right)\left(x_{j - \um} - x_{j - 1}\right)} \\
+	\varphi_2^j \left(x\right)&:=\frac{\left(x_j - x\right)\left(x - x_{j - 1}\right)}{\left(x_j - x_{j-1/2}\right)\left(x_{j - 1} - x_{j - \um}\right)} \\
+	\varphi_3^j \left(x\right)&:=\frac{\left(x - x_{j-1}\right)\left(x - x_{j - \um}\right)}{\left(x_j - x_{j-1}\right)\left(x_{j } - x_{j - \um}\right)}
+\end{align*}
+como para nuestro problema la partición es uniforme, pongamos de diámetro $2h$, y por la definición de $x_{j-\um}$ se ve fácilmente que 
+\begin{align*}
+	\varphi_1^j(x) &= \frac{2(x_j - x)\left(x_{j - \um} - x\right)}{h^2} \\
+	\varphi_2^j(x) &= \frac{4(x_j - x)(x - x_{j-1})}{h^2} \\
+	\varphi_3^j(x) &= \frac{2(x - x_{j-1})\left(x - x_{j-\um}\right)}{h^2}
+\end{align*}
+Dado que estamos considerando los puntos medios, vamos a construir una nueva partición $$0 = y_0 < y_1 < \cdots < y_{2J} = b$$ de la siguiente forma
+\begin{align*}
+	y_{2j} &:= x_j  \quad j = 0, 1,\dots, J  \\
+	y_{2j - 1} &:= x_{j - \um}  \quad j = 1, \dots, J
+\end{align*}
+y construimos las funciones 
+$$
+	\varphi_{2j}(x) := \begin{cases}
+		\varphi_3^j (x) & \text{ si } x \in [x_{j-1}, x_j] \\
+		\varphi_1^{j+1}(x) & \text{ si } x \in [x_j, x_{j+1}] \\
+		0 & \text{ en otro caso} 
+	\end{cases}	\quad \quad \varphi_{2j - 1}(x) := \begin{cases}
+	\varphi_2^j(x) & \text{ si } x \in [x_{j -1 }, x_j] \\
+	0 & \text{ en otro caso}
+\end{cases}
+$$ y consideramos  $V_h := \langle \varphi_1, \dots, \varphi_{2 J - 1}\rangle$ y en esta base 
+$$v_h(x) = \sum_{j=1}^{2 J - 1} v_j \varphi_j(x)$$
+
+Procedemos ahora al cálculo de la matriz de masa y de la matriz de rigidez. Pongamos
+$$M = \left[M_{ij}\right]_{1 \leq i,j \leq 2J - 1} \quad \quad K = \left[K_{ij}\right]_{1 \leq i,j \leq 2J - 1}$$ \\
+
+Primero calculamos la matriz de masa. Sean los polinomios
+$$\xi_1 (x):= (2x - 1)(x - 1)\quad \xi_2(x) := 4x(1 - x) \quad \xi_3 (x) := x(2x - 1)$$
+para $j$ fijo, los cambios de variable
+$$u_1 = \frac{x_j - x}{h}\quad u_2 = \frac{x - x_{j-1}}{h} \quad u_3 = \frac{x - x_{j-1}}{h}$$
+convierten $\varphi_1^j, \varphi_2^j$ y $\varphi_3^j$ en $\xi_1,\xi_2$ y $\xi_3$ respectivamente y transforma $[x_{j-1}, x_j]$ en $[0,1]$ y $x_{j - \um}$ en $\um$. Esto facilita enormemente los calculos. A la hora de calcular todas las integrales ya suponemos realizado los cambios de variable en las respectivas regiones. Calculamos $M_{ij}$ segun la paridad de ambos.
+
+\begin{itemize}
+	\item Si $i=2l,j=2k$, el soporte de ambas se corta $[x_{j-1}, x_{j+1}] \cap [x_{i-1}, x_{i+1}] \neq \varnothing$ luego tenemos que ver los casos $k = l-1,l,l+1$
+	\begin{align*}
+		M_{2l,2l} &= \int_{0}^{1} \varphi_{2l}(x)\varphi_{2l}(x)dx = \int_{x_{l-1}}^{x_l}\varphi_3^l(x)^2dx + \int_{x_l}^{x_{l+1}}\varphi_1^{l+1}(x)^2dx \\ &= h \kets{\int_0^1 \xi_3(x)^2dx + \int_0^1 \xi_1(x)^2 dx} = \frac{4}{15}h \\
+		M_{2l, 2(l-1)} &= \int_0^1 \varphi_{2l}(x)\varphi_{2(l+1)}(x)dx = \int_{x_{l}}^{x_{l+1}} \varphi_3^l(x)\varphi_1^l(x)dx \\ &= h \kets{\int_0^1 \xi_3(x)\xi_1(x)dx} = -\frac{h}{30} \\
+		M_{2l, 2(l+1)} &= \int_0^1 \varphi_{2l}(x)\varphi_{2(l-1)}(x)dx = \int_{x_{l}}^{x_{l+1}}
+		 \varphi_1^{l+1}(x)\varphi_3^{l+1}(x)dx \\ &= h \kets{\int_0^1 \xi_1(x)\xi_3(x)dx} = -\frac{h}{30}
+	\end{align*}
+
+	\item Si $i=2l - 1, j = 2k - 1$, el único caso a analizar es cuando $i = j$ pues si no los soportes son disjuntos y por tanto las integrales nulas
+	\begin{align*}
+		M_{2l-1, 2l-1} &= \int_0^1 \varphi_{2l-1}(x)^2dx = \int_{x_{l-1}}^{x_l} \varphi_2^l(x)^2dx \\ &= h \int_0^1 \xi_2(x)^2dx = \frac{8}{15}h
+	\end{align*}
+
+	\item Si $i = 2l, j= 2k - 1$, los soportes se cortan cuando $k = l$ y cuando $k = l + 1$ luego
+	\begin{align*}
+		M_{2l, 2l - 1} &= \int_{0}^{1}\varphi_{2l}(x)\varphi_{2l - 1}(x)dx = \int_{x_{l-1}}^{x_l} \varphi_3^l(x)\varphi_2^l(x) dx \\ &= h\int_0^1 \xi_3(x)\xi_2(x)dx = \frac{h}{15} \\
+		M_{2l, 2l + 1} &= \int_0^1 \varphi_{2l}(x)\varphi_{2l + 1}(x)dx = \int_{x_l}^{x_{l+1}}\varphi_1^{l+1} (x)\varphi_2^{l+1}(x)dx \\ &= h\int_0^1 \xi_1(x)\xi_2(x)dx = \frac{h}{15} 
+	\end{align*}
+
+\end{itemize}
+	Ajustando los valores para cumplir las condiciones frontera, la matriz de masa resulta en 
+	\[
+	M = \frac{h}{30}
+	\begin{bmatrix}
+		16 & 2 & 0 & 0 & \cdots & 0 \\
+		2 & 8 & 2 & -1 & \cdots & 0 \\
+		0 & 2 & 16 & 2 & \ddots & \vdots \\
+		0 & -1 & 2 & 8 & \ddots & 0 \\
+		\vdots & \ddots & \ddots & \ddots & \ddots & 2 \\
+		0 & 0 & \cdots & 0 & 2 & 16
+	\end{bmatrix}.
+	\]
+
+
+Procedemos ahora a calcular la matriz de rigidez. Las derivadas débiles de las funciones de la base vienen dadas por 
+$$\varphi_{2j}'(x) := \begin{cases}
+	\frac{d}{dx}\varphi_3^j (x) & \text{ si } x \in [x_{j-1}, x_j] \\
+	\frac{d}{dx}\varphi_1^{j+1}(x) & \text{ si } x \in (x_j, x_{j+1}] \\
+	0 & \text{ en otro caso} 
+\end{cases}	\quad \quad \varphi_{2j - 1}'(x) := \begin{cases}
+	\frac{d}{dx}\varphi_2^j(x) & \text{ si } x \in [x_{j -1 }, x_j] \\
+	0 & \text{ en otro caso} \end{cases}$$
+Haciendo los mismos cambios de variable, teniendo en cuenta que $\varphi_j '(x) = \frac{(-1)^{j+1}}{h}\xi_j(u_j(x))$, y el mismo razonamiento:
+\begin{align*}
+	K_{2l, 2l} &= \int_0^1 \varphi_{2l}'(x)^2dx = \frac{h}{h^2} \kets{\int_0^1 \xi_3'(x)^2 dx + \int_0^1 \xi_1'(x)^2 dx} = \frac{14}{3h} \\ 
+	K_{2l, 2(l-1)} &= \int_0^1 \varphi_{2l}'(x)\varphi_{2(l+1)}'(x)dx = \frac{1}{h}\int_0^1 \xi_3'(x)\xi_1'(x)dx = \frac{h}{3}
+\end{align*}
+y siguiendo el mismo razonamiento 
+\begin{align*}
+	K_{2l, 2(l + 1)} = \frac{h}{3}\quad &\quad K_{2l - 1, 2l - 1} = \frac{16}{3h} \\
+	K_{2l, 2l-1} = -\frac{8}{3h} \quad &\quad  K_{2l, 2l + 1} = -\frac{8}{3h} 
+\end{align*}
+la matriz de rigidez resulta en 
+\[
+K=\frac{1}{3h}
+\begin{bmatrix}
+	16 & -8 & 0 & 0 & \cdots & 0 \\
+	-8 & 14 & -8 & 1 & \cdots & 0 \\
+	0 & -8 & 16 & -8 & \ddots & \vdots \\
+	0 & 1 & -8 & 14 & \ddots & 0 \\
+	\vdots & \ddots & \ddots & \ddots & \ddots & -8 \\
+	0 & 0 & \cdots & 0 & -8 & 16
+\end{bmatrix}.
+\]
+Para el cálculo del vector de carga $\bm{b} = [b_1, \dots, b_{2J - 1}]^t$ vamos a usar la regla de Simpson y susstituir por el interpolante cuadrático de $f$
+
+\begin{enumerate}[label=(\roman*)]
+		\item \textit{Regla de Simpson}:
+		\begin{align*}
+			b_2j = \int_0^1 f(x) \varphi_{2j}(x)dx &= \int_{x_{j-1}}^{x_j} f(x) \varphi_3^j(x)dx + \int_{x_j}^{x_{j+1}} f(x) \varphi_1^{j+1}(x)dx \\ &\approx \frac{h}{6}\kets{f(x_{j-1})\varphi_3^j(x_{j-1}) + 4f\left(x_{j-\um}\right) \varphi_3^j\left(x_{j- \um }\right) + f(x_j)\varphi_3^j(x_j)} \\
+			&+ \frac{h}{6}\kets{f(x_{})\varphi_3^{j+1}(x_{j}) + 4f\left(x_{j+\um}\right) \varphi_1^{j+1}\left(x_{j+ \um }\right) + f(x_j)\varphi_1^{j+1}(x_{j+1})} \\
+			&= \frac{h}{6} f(x_j) + \frac{h}{6}f(x_j) = \frac{h}{3}f(x_j) \\
+			b_{2j-1} =\int_0^1 f(x) \varphi_{2j - 1}(x)dx &= \int_{x_{j-1}}^{x_j} f(x) \varphi_2^j(x)dx \approx \frac{h}{6} 4 f\left(x_{j - \um}\right) = \frac{2h}{3}f\left(x_{j-\um}\right)
+		\end{align*}
+	 	\item \textit{Sustitución por el interpolante}:\\
+	 	Por los cáculos anteriores y de manera idéntica al caso de elementos lineales, si $I_h f$ es el interpolante cuadrático, entonces el vector de carga se calcula por $\bm{b} = M \bm{F}$ donde el vector $\bm{F}$ es el de evaluaciones de $f$ en los nodos de la malla.
+\end{enumerate}
+
+\newpage
+
+\section{Orden de convergencia para elementos finitos cuadráticos}
+El tratamiento teórico garantiza que orden de convergencia es de $h^3$. De nuevo, usando valores $J=10,11,\dots,510$, los métodos anteriores para aproximar el vector de carga y la regla de Simpson para aproximar la norma $L^2$ del error obtenemos las siguientes gráficas
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.7\linewidth]{graficas/error_cuadratico_simpson}
+	\caption{Error para elementos cuadráticos con Simpson}
+	\label{fig:errorcuadraticosimpson}
+\end{figure}
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.7\linewidth]{graficas/error_cuadratico_interpolante}
+	\caption{Error elementos cuadráticos con interpolante cuadrático}
+	\label{fig:errorcuadraticointerpolante}
+\end{figure}
+
+En ambos casos \texttt{polyfit} devuelve una pediente de $-3$ y por tanto se observa el orden de convergencia correcto.
+\end{document}
